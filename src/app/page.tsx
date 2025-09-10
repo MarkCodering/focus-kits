@@ -35,7 +35,6 @@ import {
   Coffee,
   Target,
   TimerReset,
-  Rocket,
   Swords,
   Star,
   Gift,
@@ -44,7 +43,6 @@ import {
   Trophy,
   Sun,
   Moon,
-  MonitorSmartphone,
 } from "lucide-react";
 
 // --------------------------
@@ -95,7 +93,7 @@ const defaultSettings: Settings = {
   soundOn: true,
   notifyOn: true,
   themeSkin: "space",
-  themeMode: "system",
+  themeMode: "light",
 };
 
 const defaultMeta: Meta = {
@@ -108,11 +106,7 @@ const defaultMeta: Meta = {
   count30Today: 0,
 };
 
-const themeSkins: Record<ThemeKey, { label: string; emoji: string; gradient: string; ring: string }>= {
-  space:  { label: "Space",  emoji: "🚀", gradient: "from-indigo-500 via-fuchsia-500 to-cyan-500", ring: "shadow-[0_0_40px_rgba(99,102,241,0.35)]" },
-  forest: { label: "Forest", emoji: "🌲", gradient: "from-emerald-500 via-green-500 to-lime-400", ring: "shadow-[0_0_40px_rgba(16,185,129,0.35)]" },
-  cyber:  { label: "Cyber",  emoji: "🟣", gradient: "from-pink-500 via-cyan-400 to-amber-300", ring: "shadow-[0_0_40px_rgba(236,72,153,0.35)]" },
-};
+// (skins removed for simplified branding)
 
 // XP curve
 const levelCap = (lvl: number) => 100 + (lvl - 1) * 50; // xp to next
@@ -366,7 +360,7 @@ export default function FocusTimerPro() {
   const endEarly = () => { setRunning(false); handleSessionComplete(false); };
 
   // svg gradient id
-  const ringGradientId = useMemo(() => `ring-${Math.random().toString(36).slice(2)}`,[settings.themeSkin]);
+  const ringGradientId = useMemo(() => `ring-${Math.random().toString(36).slice(2)}`,[themeMode]);
 
   // --------------------------
   // UI
@@ -383,17 +377,10 @@ export default function FocusTimerPro() {
       {/* Top bar */}
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold"><span className="text-xl">{themeSkins[settings.themeSkin].emoji}</span> ADHD Focus</div>
+          <div className="flex items-center gap-2 font-semibold">Focus Kits</div>
           <div className="flex items-center gap-2">
-            {/* Theme skin */}
-            <div className="hidden sm:flex gap-1 rounded-xl border p-1 bg-muted/30">
-              {(Object.keys(themeSkins) as ThemeKey[]).map((k) => (
-                <Button key={k} size="sm" variant={settings.themeSkin===k?"default":"ghost"} onClick={()=>setSettings({...settings, themeSkin:k})}>{themeSkins[k].emoji}</Button>
-              ))}
-            </div>
-            {/* Theme mode */}
+            {/* Theme mode: light / dark */}
             <div className="flex gap-1 rounded-xl border p-1 bg-muted/30">
-              <Button size="sm" variant={themeMode==="system"?"default":"ghost"} onClick={()=>setThemeMode("system")} title="System"><MonitorSmartphone className="h-4 w-4"/></Button>
               <Button size="sm" variant={themeMode==="light"?"default":"ghost"} onClick={()=>setThemeMode("light")} title="Light"><Sun className="h-4 w-4"/></Button>
               <Button size="sm" variant={themeMode==="dark"?"default":"ghost"} onClick={()=>setThemeMode("dark")} title="Dark"><Moon className="h-4 w-4"/></Button>
             </div>
@@ -406,10 +393,7 @@ export default function FocusTimerPro() {
         <Card className="shadow-xl border-muted/40 overflow-hidden">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <span className="text-xl">{themeSkins[settings.themeSkin].emoji}</span>
-                ADHD Focus Timer
-              </CardTitle>
+              <CardTitle className="text-2xl">Focus Timer</CardTitle>
               <kbd className="text-xs text-muted-foreground hidden md:block">1/2/3/4 Presets • Space Start/Pause • R Reset</kbd>
             </div>
             <CardDescription>Pick a quest, hit Start, collect XP. Momentum beats motivation.</CardDescription>
@@ -453,7 +437,7 @@ export default function FocusTimerPro() {
 
                 {/* Timer ring with glow */}
                 <div className="relative">
-                  <div className={`absolute inset-0 -z-10 blur-2xl opacity-40 ${themeSkins[settings.themeSkin].ring}`} />
+                  <div className="absolute inset-0 -z-10 blur-2xl opacity-40 rounded-full bg-primary/30" />
                   <svg viewBox="0 0 320 320" className="block w-[80vw] max-w-[320px] h-auto drop-shadow">
                     <defs>
                       <linearGradient id={ringGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
@@ -475,7 +459,7 @@ export default function FocusTimerPro() {
                       initial={false}
                       animate={{ strokeDashoffset: C - (C - dash) }}
                       transition={{ type: "tween", duration: 0.2 }}
-                      className={`text-transparent bg-clip-text bg-gradient-to-r ${themeSkins[settings.themeSkin].gradient}`}
+                      className="text-primary"
                     />
                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-mono text-5xl sm:text-6xl" aria-live="polite">
                       {pad(minutes)}:{pad(seconds)}
@@ -564,22 +548,11 @@ export default function FocusTimerPro() {
                 </div>
                 <Switch checked={settings.autoStartNext} onCheckedChange={(v)=>setSettings({...settings, autoStartNext:v})} />
               </div>
-              {/* Skin picker */}
-              <div className="rounded-xl border p-4">
-                <div className="font-medium mb-2">Theme Skin</div>
-                <div className="grid grid-cols-3 gap-2">
-                  {(Object.keys(themeSkins) as ThemeKey[]).map((k) => (
-                    <Button key={k} variant={settings.themeSkin===k?"default":"secondary"} onClick={()=>setSettings({...settings, themeSkin:k})}>
-                      {themeSkins[k].emoji} {themeSkins[k].label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              {/* Simplified: no theme skins */}
               {/* Mode picker */}
               <div className="rounded-xl border p-4">
                 <div className="font-medium mb-2">Theme Mode</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant={themeMode==="system"?"default":"secondary"} onClick={()=>setThemeMode("system")}><MonitorSmartphone className="h-4 w-4 mr-1"/>System</Button>
+                <div className="grid grid-cols-2 gap-2">
                   <Button variant={themeMode==="light"?"default":"secondary"} onClick={()=>setThemeMode("light")}><Sun className="h-4 w-4 mr-1"/>Light</Button>
                   <Button variant={themeMode==="dark"?"default":"secondary"} onClick={()=>setThemeMode("dark")}><Moon className="h-4 w-4 mr-1"/>Dark</Button>
                 </div>

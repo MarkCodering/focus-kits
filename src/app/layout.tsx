@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   // Ensure browser UI theme color matches light/dark backgrounds
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "hsl(0 0% 100%)" },
-    { media: "(prefers-color-scheme: dark)", color: "hsl(222.2 84% 4.9%)" },
+    { media: "(prefers-color-scheme: dark)", color: "hsl(0 0% 3.9%)" },
   ],
 };
 
