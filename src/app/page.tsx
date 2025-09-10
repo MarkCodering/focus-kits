@@ -20,8 +20,8 @@ import { Sun, Moon, Star, Gift, Crown } from "lucide-react";
 // --------------------------
 // Helpers & constants
 // --------------------------
-const pad = (n: number) => n.toString().padStart(2, "0");
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+// const pad = (n: number) => n.toString().padStart(2, "0");
+// const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 const fmtDate = (d: Date) => d.toISOString().slice(0, 10);
 
 // localStorage keys

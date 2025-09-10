@@ -29,7 +29,7 @@ export function SettingsPage({
   onSettingsChange, 
   onThemeModeChange 
 }: SettingsPageProps) {
-  const updateSetting = (key: keyof Settings, value: any) => {
+  const updateSetting = (key: keyof Settings, value: boolean | ThemeKey | ThemeMode) => {
     onSettingsChange({ ...settings, [key]: value });
   };
 
