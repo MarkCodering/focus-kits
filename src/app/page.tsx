@@ -10,10 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -30,11 +27,8 @@ import {
   Pause,
   RotateCcw,
   Bell,
-  Keyboard,
   Volume2,
-  Coffee,
   Target,
-  TimerReset,
   Swords,
   Star,
   Gift,
@@ -388,8 +382,8 @@ export default function FocusTimerPro() {
           <div className="flex items-center gap-2">
             {/* Theme mode: light / dark */}
             <div className="flex gap-1 rounded-xl border p-1 bg-muted/30">
-              <Button size="sm" variant={themeMode==="light"?"default":"ghost"} onClick={()=>setThemeMode("light")} title="Light"><Sun className="h-4 w-4"/></Button>
-              <Button size="sm" variant={themeMode==="dark"?"default":"ghost"} onClick={()=>setThemeMode("dark")} title="Dark"><Moon className="h-4 w-4"/></Button>
+              <Button size="sm" variant={themeMode==="light"?"default":"ghost"} onClick={()=>setThemeMode("light")} title="Light" className={themeMode==="light"?"bg-black text-white hover:bg-black/90":""}><Sun className="h-4 w-4"/></Button>
+              <Button size="sm" variant={themeMode==="dark"?"default":"ghost"} onClick={()=>setThemeMode("dark")} title="Dark" className={themeMode==="dark"?"bg-white text-black hover:bg-white/90":""}><Moon className="h-4 w-4"/></Button>
             </div>
           </div>
         </div>
@@ -397,13 +391,13 @@ export default function FocusTimerPro() {
 
       <main className="mx-auto max-w-6xl p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left */}
-        <Card className="shadow-xl border-muted/40 overflow-hidden">
-          <CardHeader className="space-y-1">
+        <Card className="shadow-xl border-muted/40 overflow-hidden card-elevated">
+          <CardHeader className="space-y-1 bg-gradient-to-br from-background to-muted/20">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl">Focus Timer</CardTitle>
-              <kbd className="text-xs text-muted-foreground hidden md:block">1/2/3/4 Presets • Space Start/Pause • R Reset</kbd>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Focus Timer</CardTitle>
+              <kbd className="text-xs text-muted-foreground hidden md:block bg-muted px-2 py-1 rounded">1/2/3/4 Presets • Space Start/Pause • R Reset</kbd>
             </div>
-            <CardDescription>Pick a quest, hit Start, collect XP. Momentum beats motivation.</CardDescription>
+            <CardDescription className="text-base">Pick a quest, hit Start, collect XP. Momentum beats motivation.</CardDescription>
           </CardHeader>
           <CardContent>
             {!questChosen ? (
@@ -411,8 +405,8 @@ export default function FocusTimerPro() {
                 <div className="text-sm text-muted-foreground">Choose your quest</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl">
                   {presets.map((m) => (
-                    <motion.div key={m} whileTap={{ scale: 0.98 }}>
-                      <Button size="lg" className="h-14 text-lg w-full" onClick={() => startWithPreset(m)}>
+                    <motion.div key={m} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}>
+                      <Button size="lg" className="h-14 text-lg w-full bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => startWithPreset(m)}>
                         <Swords className="h-5 w-5 mr-2" /> {m} min
                       </Button>
                     </motion.div>
@@ -421,13 +415,13 @@ export default function FocusTimerPro() {
                 <div className="flex flex-wrap items-center gap-3 w-full max-w-md">
                   <Input
                     type="number"
-                    className="w-28 flex-1 min-w-[8rem]"
+                    className="w-28 flex-1 min-w-[8rem] border-2 focus:border-black dark:focus:border-white focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-all duration-200 shadow-sm hover:shadow-md"
                     value={customMins}
                     min={1}
                     max={180}
                     onChange={(e)=>setCustomMins(clamp(parseInt(e.target.value||"0"),1,180))}
                   />
-                  <Button className="flex-1 min-w-[8rem]" onClick={()=>startWithPreset(customMins)}>Custom</Button>
+                  <Button className="flex-1 min-w-[8rem] bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200" onClick={()=>startWithPreset(customMins)}>Custom</Button>
                 </div>
                 <div className="text-xs text-muted-foreground">Four choices = still simple. Custom if you must.</div>
               </div>
@@ -444,20 +438,33 @@ export default function FocusTimerPro() {
 
                 {/* Timer ring with glow */}
                 <div className="relative">
-                  <svg viewBox="0 0 320 320" className="block w-[80vw] max-w-[320px] h-auto drop-shadow">
+                  <svg viewBox="0 0 320 320" className="block w-[80vw] max-w-[320px] h-auto drop-shadow-lg">
                     <defs>
-                      <linearGradient id={ringGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="currentColor" />
-                        <stop offset="100%" stopColor="currentColor" />
+                      <linearGradient id={`${ringGradientId}-light`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="black" />
+                        <stop offset="50%" stopColor="black" />
+                        <stop offset="100%" stopColor="rgba(0,0,0,0.8)" />
                       </linearGradient>
+                      <linearGradient id={`${ringGradientId}-dark`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="white" />
+                        <stop offset="50%" stopColor="white" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0.8)" />
+                      </linearGradient>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge> 
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                     </defs>
-                    <circle cx={160} cy={160} r={R} className="text-muted" stroke="currentColor" strokeWidth={16} fill="none" opacity={0.25} />
+                    <circle cx={160} cy={160} r={R} className="text-muted/40" stroke="currentColor" strokeWidth={12} fill="none" />
                     <motion.circle
                       cx={160}
                       cy={160}
                       r={R}
-                      stroke={`url(#${ringGradientId})`}
-                      strokeWidth={16}
+                      stroke={`url(#${ringGradientId}-${themeMode === 'dark' ? 'dark' : 'light'})`}
+                      strokeWidth={12}
                       strokeLinecap="round"
                       fill="none"
                       strokeDasharray={C}
@@ -465,26 +472,32 @@ export default function FocusTimerPro() {
                       initial={false}
                       animate={{ strokeDashoffset: C - (C - dash) }}
                       transition={{ type: "tween", duration: 0.2 }}
-                      className="text-primary"
+                      filter="url(#glow)"
                     />
-                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-mono text-5xl sm:text-6xl" aria-live="polite">
+                    <text x="50%" y="48%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-mono text-4xl sm:text-5xl font-bold" aria-live="polite">
                       {pad(minutes)}:{pad(seconds)}
                     </text>
+                    <text x="50%" y="58%" textAnchor="middle" dominantBaseline="central" className="fill-muted-foreground text-sm font-medium">
+                      {mode === "focus" ? "Focus Session" : mode === "short" ? "Short Break" : mode === "long" ? "Long Break" : "Custom Session"}
+                    </text>
                   </svg>
-                  <div className="absolute inset-0 flex items-end justify-center pb-4">
-                    <div className="text-sm text-muted-foreground">{mode === "focus" ? "Focus" : mode === "short" ? "Short Break" : mode === "long" ? "Long Break" : "Custom"}</div>
-                  </div>
                 </div>
 
                 {/* Controls */}
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  <motion.div whileTap={{ scale: 0.98 }}>
-                    <Button size="lg" onClick={onStartPause} className="px-6">
+                  <motion.div whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}>
+                    <Button size="lg" onClick={onStartPause} className="px-8 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">
                       {running ? (<div className="flex items-center gap-2"><Pause className="h-5 w-5" /> Pause</div>) : (<div className="flex items-center gap-2"><Play className="h-5 w-5" /> Start</div>)}
                     </Button>
                   </motion.div>
-                  <Button variant="secondary" size="lg" onClick={onReset}><RotateCcw className="h-5 w-5 mr-2" /> Reset</Button>
-                  {running && (<Button variant="ghost" onClick={endEarly} className="text-muted-foreground">Bank now</Button>)}
+                  <motion.div whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}>
+                    <Button variant="secondary" size="lg" onClick={onReset} className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200"><RotateCcw className="h-5 w-5 mr-2" /> Reset</Button>
+                  </motion.div>
+                  {running && (
+                    <motion.div whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}>
+                      <Button variant="ghost" onClick={endEarly} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">Bank now</Button>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="text-xs text-muted-foreground">Space: Start/Pause • R: Reset • 1/2/3/4: Presets</div>
@@ -494,10 +507,10 @@ export default function FocusTimerPro() {
         </Card>
 
         {/* Right */}
-        <Card className="shadow-xl border-muted/40">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5" /> Progress</CardTitle>
-            <CardDescription>XP, level-ups, streaks, and tiny dopamine confetti.</CardDescription>
+        <Card className="shadow-xl border-muted/40 card-elevated">
+          <CardHeader className="bg-gradient-to-br from-background to-muted/20">
+            <CardTitle className="flex items-center gap-2 font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"><Trophy className="h-5 w-5 text-black dark:text-white" /> Progress</CardTitle>
+            <CardDescription className="text-base">XP, level-ups, streaks, and tiny dopamine confetti.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Level bar */}
@@ -506,7 +519,7 @@ export default function FocusTimerPro() {
                 <div className="font-medium flex items-center gap-2"><Crown className="h-4 w-4" /> Level {meta.level}</div>
                 <div className="text-xs text-muted-foreground">{Math.round(levelProgress)}%</div>
               </div>
-              <Progress value={levelProgress} />
+              <Progress value={levelProgress} className="h-3 bg-muted/50 [&>div]:bg-black dark:[&>div]:bg-white [&>div]:shadow-sm" />
               <div className="text-xs text-muted-foreground mt-1">{xpNeeded} XP to next level</div>
             </div>
 
@@ -516,16 +529,16 @@ export default function FocusTimerPro() {
                 <div className="font-medium flex items-center gap-2"><Star className="h-4 w-4" /> Today streak</div>
                 <p className="text-sm text-muted-foreground">{meta.dailyStreak} session{meta.dailyStreak === 1 ? "" : "s"} • Best {meta.bestStreak}</p>
               </div>
-              <Badge variant="secondary">x{(1 + Math.min(5, Math.max(0, meta.dailyStreak - 1)) * 0.1).toFixed(1)}</Badge>
+              <Badge variant="secondary" className="bg-gradient-to-r from-secondary to-secondary/90 shadow-sm">x{(1 + Math.min(5, Math.max(0, meta.dailyStreak - 1)) * 0.1).toFixed(1)}</Badge>
             </div>
 
             {/* Achievements */}
             <div className="rounded-xl border p-4">
               <div className="font-medium mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4" /> Achievements</div>
               <div className="flex flex-wrap gap-2">
-                <Badge variant={meta.achievements["first-session"] ? "default" : "secondary"}>First Session</Badge>
-                <Badge variant={meta.achievements["five-today"] ? "default" : "secondary"}>Five Today</Badge>
-                <Badge variant={meta.achievements["triple-30"] ? "default" : "secondary"}>3×30 Focus</Badge>
+                <Badge variant={meta.achievements["first-session"] ? "default" : "secondary"} className={meta.achievements["first-session"] ? "bg-black text-white dark:bg-white dark:text-black shadow-md" : "bg-gradient-to-r from-secondary to-secondary/90"}>First Session</Badge>
+                <Badge variant={meta.achievements["five-today"] ? "default" : "secondary"} className={meta.achievements["five-today"] ? "bg-black text-white dark:bg-white dark:text-black shadow-md" : "bg-gradient-to-r from-secondary to-secondary/90"}>Five Today</Badge>
+                <Badge variant={meta.achievements["triple-30"] ? "default" : "secondary"} className={meta.achievements["triple-30"] ? "bg-black text-white dark:bg-white dark:text-black shadow-md" : "bg-gradient-to-r from-secondary to-secondary/90"}>3×30 Focus</Badge>
               </div>
             </div>
 
@@ -559,8 +572,8 @@ export default function FocusTimerPro() {
               <div className="rounded-xl border p-4">
                 <div className="font-medium mb-2">Theme Mode</div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button variant={themeMode==="light"?"default":"secondary"} onClick={()=>setThemeMode("light")}><Sun className="h-4 w-4 mr-1"/>Light</Button>
-                  <Button variant={themeMode==="dark"?"default":"secondary"} onClick={()=>setThemeMode("dark")}><Moon className="h-4 w-4 mr-1"/>Dark</Button>
+                  <Button variant={themeMode==="light"?"default":"secondary"} onClick={()=>setThemeMode("light")} className={themeMode==="light"?"bg-black text-white hover:bg-black/90":""}><Sun className="h-4 w-4 mr-1"/>Light</Button>
+                  <Button variant={themeMode==="dark"?"default":"secondary"} onClick={()=>setThemeMode("dark")} className={themeMode==="dark"?"bg-white text-black hover:bg-white/90":""}><Moon className="h-4 w-4 mr-1"/>Dark</Button>
                 </div>
               </div>
             </div>
@@ -582,8 +595,8 @@ export default function FocusTimerPro() {
             <DialogTitle className="flex items-center gap-2"><Crown className="h-5 w-5" /> Level Up!</DialogTitle>
             <DialogDescription>New level unlocked. Keep the streak to snowball gains.</DialogDescription>
           </DialogHeader>
-          <div className="flex items-center gap-2"><Badge>+Level</Badge><Badge variant="secondary">+Perks (soon)</Badge></div>
-          <div className="flex justify-end"><Button onClick={()=>setShowLevelUp(false)}>Nice</Button></div>
+          <div className="flex items-center gap-2"><Badge className="bg-black text-white dark:bg-white dark:text-black shadow-md">+Level</Badge><Badge variant="secondary" className="bg-gradient-to-r from-secondary to-secondary/90">+Perks (soon)</Badge></div>
+          <div className="flex justify-end"><Button onClick={()=>setShowLevelUp(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Nice</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -594,7 +607,7 @@ export default function FocusTimerPro() {
             <DialogDescription>Surprise reward unlocked.</DialogDescription>
           </DialogHeader>
           <div className="text-lg">{lootItem}</div>
-          <div className="flex justify-end"><Button onClick={()=>setShowLoot(false)}>Claim</Button></div>
+          <div className="flex justify-end"><Button onClick={()=>setShowLoot(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Claim</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -605,8 +618,8 @@ export default function FocusTimerPro() {
             <DialogDescription>You collected {earnedPartial} XP. Want a 5‑minute bonus round?</DialogDescription>
           </DialogHeader>
           <div className="flex justify-between">
-            <Button variant="secondary" onClick={()=>setShowFailSafe(false)}>Not now</Button>
-            <Button onClick={()=>{ setShowFailSafe(false); startWithPreset(5); }}>Bonus Round</Button>
+            <Button variant="secondary" onClick={()=>setShowFailSafe(false)} className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200">Not now</Button>
+            <Button onClick={()=>{ setShowFailSafe(false); startWithPreset(5); }} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Bonus Round</Button>
           </div>
         </DialogContent>
       </Dialog>

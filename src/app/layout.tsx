@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,6 +26,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+          (function(){
+            try{
+              var KEY = 'adhd-focus-theme-v3';
+              var m = localStorage.getItem(KEY) || 'light';
+              var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+              var dark = m === 'dark' || (m === 'system' && prefersDark);
+              var root = document.documentElement;
+              if (dark) root.classList.add('dark'); else root.classList.remove('dark');
+            }catch(e){}
+          })();
+          `}
+        </Script>
+      </head>
       <body className="antialiased">
         {children}
       </body>
