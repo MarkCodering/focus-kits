@@ -247,7 +247,7 @@ export default function FocusKitsApp() {
     const gained = grantXP(minsDone);
     if (!full) { setEarnedPartial(gained); setShowFailSafe(true); }
     maybeLoot();
-  }, [duration, remaining, mode, settings, meta]);
+  }, [duration, remaining, mode, settings, meta, beep, notify, grantXP, maybeLoot]);
 
   // Timer engine
   useEffect(() => {
@@ -296,7 +296,7 @@ export default function FocusKitsApp() {
     switchMode(mode, minutesFromDuration(duration));
     setQuestChosen(false);
     setRunning(false);
-  }, [mode, duration]);
+  }, [mode, duration, switchMode]);
 
   // keyboard
   useEffect(() => {
