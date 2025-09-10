@@ -4,12 +4,27 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Focus Kits",
-  description: "A Next.js template with shadcn/ui components for building beautiful applications",
-  // Ensure browser UI theme color matches light/dark backgrounds
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "hsl(0 0% 100%)" },
-    { media: "(prefers-color-scheme: dark)", color: "hsl(0 0% 3.9%)" },
-  ],
+  description: "A beautiful focus timer app with gamification elements",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Focus Kits",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Focus Kits",
+    title: "Focus Kits",
+    description: "A beautiful focus timer app with gamification elements",
+  },
+  twitter: {
+    card: "summary",
+    title: "Focus Kits",
+    description: "A beautiful focus timer app with gamification elements",
+  },
 };
 
 // Mobile-friendly viewport configuration
@@ -39,6 +54,17 @@ export default function RootLayout({
               if (dark) root.classList.add('dark'); else root.classList.remove('dark');
             }catch(e){}
           })();
+          `}
+        </Script>
+        <Script id="sw-register" strategy="afterInteractive">
+          {`
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+            });
+          }
           `}
         </Script>
       </head>

@@ -108,7 +108,7 @@
 /* Custom button improvements */
 @layer components {
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90;
+    @apply bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90;
     @apply shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98];
   }
   
