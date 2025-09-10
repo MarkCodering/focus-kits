@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -197,70 +197,7 @@ export default function FocusKitsApp() {
 
   const beep = () => settings.soundOn && audioRef.current?.play().catch(() => {});
 
-  // Timer engine
-  useEffect(() => {
-    if (!running) {
-      if (tickRef.current) cancelAnimationFrame(tickRef.current);
-      tickRef.current = null;
-      lastTsRef.current = null;
-      return;
-    }
-    const step = (ts: number) => {
-      if (!lastTsRef.current) lastTsRef.current = ts;
-      const dt = (ts - lastTsRef.current) / 1000;
-      lastTsRef.current = ts;
-      setRemaining((r) => {
-        const next = Math.max(0, r - dt);
-        if (next === 0) {
-          setRunning(false);
-          handleSessionComplete(true);
-        }
-        return next;
-      });
-      tickRef.current = requestAnimationFrame(step);
-    };
-    tickRef.current = requestAnimationFrame(step);
-    return () => { if (tickRef.current) cancelAnimationFrame(tickRef.current); };
-  }, [running]);
-
   const minutesFromDuration = (secs: number) => Math.round(secs / 60);
-
-  const switchMode = (m: Mode, mmins?: number) => {
-    setMode(m);
-    const mins = m === "focus" ? (mmins ?? minutesFromDuration(duration)) : m === "short" ? 5 : m === "long" ? 15 : customMins;
-    const secs = Math.max(1, Math.round(mins * 60));
-    setDuration(secs);
-    setRemaining(secs);
-  };
-
-  const startWithPreset = (mins: number) => {
-    setQuestChosen(true);
-    setMode("focus");
-    setDuration(mins * 60);
-    setRemaining(mins * 60);
-    setRunning(true);
-  };
-
-  const onStartPause = () => setRunning((v) => !v);
-  const onReset = () => {
-    switchMode(mode, minutesFromDuration(duration));
-    setQuestChosen(false);
-    setRunning(false);
-  };
-
-  // keyboard
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === " ") { e.preventDefault(); if (!questChosen) return; onStartPause(); }
-      else if (e.key.toLowerCase() === "r") onReset();
-      else if (e.key === "1") startWithPreset(5);
-      else if (e.key === "2") startWithPreset(10);
-      else if (e.key === "3") startWithPreset(15);
-      else if (e.key === "4") startWithPreset(30);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => { window.removeEventListener("keydown", onKey); };
-  }, [questChosen]);
 
   // XP & loot
   const grantXP = (mins: number) => {
@@ -302,7 +239,7 @@ export default function FocusKitsApp() {
     }
   };
 
-  const handleSessionComplete = (full: boolean) => {
+  const handleSessionComplete = useCallback((full: boolean) => {
     beep();
     notify(full ? "Focus complete" : "Session ended", full ? "+XP added. Keep the streak?" : "Partial XP banked. Bonus round?");
     const secsDone = Math.round((duration - remaining));
@@ -310,7 +247,70 @@ export default function FocusKitsApp() {
     const gained = grantXP(minsDone);
     if (!full) { setEarnedPartial(gained); setShowFailSafe(true); }
     maybeLoot();
+  }, [duration, remaining, mode, settings, meta]);
+
+  // Timer engine
+  useEffect(() => {
+    if (!running) {
+      if (tickRef.current) cancelAnimationFrame(tickRef.current);
+      tickRef.current = null;
+      lastTsRef.current = null;
+      return;
+    }
+    const step = (ts: number) => {
+      if (!lastTsRef.current) lastTsRef.current = ts;
+      const dt = (ts - lastTsRef.current) / 1000;
+      lastTsRef.current = ts;
+      setRemaining((r) => {
+        const next = Math.max(0, r - dt);
+        if (next === 0) {
+          setRunning(false);
+          handleSessionComplete(true);
+        }
+        return next;
+      });
+      tickRef.current = requestAnimationFrame(step);
+    };
+    tickRef.current = requestAnimationFrame(step);
+    return () => { if (tickRef.current) cancelAnimationFrame(tickRef.current); };
+  }, [running, handleSessionComplete]);
+
+  const switchMode = (m: Mode, mmins?: number) => {
+    setMode(m);
+    const mins = m === "focus" ? (mmins ?? minutesFromDuration(duration)) : m === "short" ? 5 : m === "long" ? 15 : customMins;
+    const secs = Math.max(1, Math.round(mins * 60));
+    setDuration(secs);
+    setRemaining(secs);
   };
+
+  const startWithPreset = useCallback((mins: number) => {
+    setQuestChosen(true);
+    setMode("focus");
+    setDuration(mins * 60);
+    setRemaining(mins * 60);
+    setRunning(true);
+  }, []);
+
+  const onStartPause = () => setRunning((v) => !v);
+  const onReset = useCallback(() => {
+    switchMode(mode, minutesFromDuration(duration));
+    setQuestChosen(false);
+    setRunning(false);
+  }, [mode, duration]);
+
+  // keyboard
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === " ") { e.preventDefault(); if (!questChosen) return; onStartPause(); }
+      else if (e.key.toLowerCase() === "r") onReset();
+      else if (e.key === "1") startWithPreset(5);
+      else if (e.key === "2") startWithPreset(10);
+      else if (e.key === "3") startWithPreset(15);
+      else if (e.key === "4") startWithPreset(30);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); };
+  }, [questChosen, onReset, startWithPreset]);
 
   const endEarly = () => { setRunning(false); handleSessionComplete(false); };
 
