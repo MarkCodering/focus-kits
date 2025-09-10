@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
@@ -115,10 +115,14 @@ export default function FocusTimerPro() {
   // --------------------------
   // Theme mode (light/dark/system)
   // --------------------------
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return defaultSettings.themeMode;
-    return (localStorage.getItem(LS.theme) as ThemeMode) || defaultSettings.themeMode;
-  });
+  const [themeMode, setThemeMode] = useState<ThemeMode>(defaultSettings.themeMode);
+
+  // Load saved theme on mount to avoid SSR/client mismatch
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = (localStorage.getItem(LS.theme) as ThemeMode) || defaultSettings.themeMode;
+    setThemeMode(saved);
+  }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -141,29 +145,30 @@ export default function FocusTimerPro() {
   // --------------------------
   // Settings & meta
   // --------------------------
-  const [settings, setSettings] = useState<Settings>(() => {
-    if (typeof window === "undefined") return defaultSettings;
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
+
+  // Load saved settings on mount (post-hydration)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
       const saved = JSON.parse(localStorage.getItem(LS.settings) || "{}");
-      return { ...defaultSettings, ...saved } as Settings;
-    } catch {
-      return defaultSettings;
-    }
-  });
+      setSettings({ ...defaultSettings, ...saved });
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(LS.settings, JSON.stringify(settings));
   }, [settings]);
 
-  const [meta, setMeta] = useState<Meta>(() => {
-    if (typeof window === "undefined") return defaultMeta;
+  const [meta, setMeta] = useState<Meta>(defaultMeta);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
       const saved = JSON.parse(localStorage.getItem(LS.meta) || "{}");
-      return { ...defaultMeta, ...saved } as Meta;
-    } catch {
-      return defaultMeta;
-    }
-  });
+      setMeta({ ...defaultMeta, ...saved });
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(LS.meta, JSON.stringify(meta));
@@ -360,19 +365,21 @@ export default function FocusTimerPro() {
   const endEarly = () => { setRunning(false); handleSessionComplete(false); };
 
   // svg gradient id
-  const ringGradientId = useMemo(() => `ring-${Math.random().toString(36).slice(2)}`,[themeMode]);
+  const ringGradientId = useId();
 
   // --------------------------
   // UI
   // --------------------------
+  // Avoid theme/UI flicker before hydration
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
   return (
-    <div className="relative min-h-screen w-full bg-background text-foreground overflow-hidden">
-      {/* Ambient background gradients that adapt to light/dark */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-br from-primary/40 via-secondary/40 to-muted" />
-        <div className="absolute -bottom-32 -right-32 h-[28rem] w-[28rem] rounded-full blur-3xl opacity-30 dark:opacity-20 bg-gradient-to-tr from-muted via-primary/30 to-secondary/40" />
-        <div className="absolute inset-0 opacity-[0.08] dark:opacity-[0.12] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] bg-[linear-gradient(to_right,theme(colors.border)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border)_1px,transparent_1px)] bg-[size:32px_32px]" />
-      </div>
+    <div className="relative min-h-screen w-full bg-background text-foreground">
 
       {/* Top bar */}
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -420,7 +427,7 @@ export default function FocusTimerPro() {
                     max={180}
                     onChange={(e)=>setCustomMins(clamp(parseInt(e.target.value||"0"),1,180))}
                   />
-                  <Button className="flex-1 min-w-[8rem]" variant="secondary" onClick={()=>startWithPreset(customMins)}>Custom</Button>
+                  <Button className="flex-1 min-w-[8rem]" onClick={()=>startWithPreset(customMins)}>Custom</Button>
                 </div>
                 <div className="text-xs text-muted-foreground">Four choices = still simple. Custom if you must.</div>
               </div>
@@ -437,7 +444,6 @@ export default function FocusTimerPro() {
 
                 {/* Timer ring with glow */}
                 <div className="relative">
-                  <div className="absolute inset-0 -z-10 blur-2xl opacity-40 rounded-full bg-primary/30" />
                   <svg viewBox="0 0 320 320" className="block w-[80vw] max-w-[320px] h-auto drop-shadow">
                     <defs>
                       <linearGradient id={ringGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
