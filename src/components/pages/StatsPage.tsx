@@ -46,7 +46,7 @@ export function StatsPage({ meta }: StatsPageProps) {
             <h3 className="font-medium mb-4 flex items-center gap-2">
               <TrendingUp className="h-4 w-4" /> Overview
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="rounded-xl border p-4 text-center">
                 <Clock className="h-6 w-6 mx-auto mb-2 text-black dark:text-white" />
                 <div className="text-2xl font-bold text-black dark:text-white">{totalFocusTime}</div>

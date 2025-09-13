@@ -381,7 +381,7 @@ export default function FocusKitsApp() {
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="mx-auto max-w-md px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold">Focus Kits</div>
-          <div className="flex gap-1 rounded-xl border p-1 bg-muted/30">
+          <div className="flex gap-1.5 rounded-xl border p-1.5 bg-muted/30">
             <Button 
               size="sm" 
               variant={themeMode === "light" ? "default" : "ghost"} 

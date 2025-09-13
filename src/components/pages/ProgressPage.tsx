@@ -99,7 +99,7 @@ export function ProgressPage({ meta }: ProgressPageProps) {
           <Separator />
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-xl border p-4 text-center">
               <div className="text-2xl font-bold text-black dark:text-white">{meta.xp}</div>
               <div className="text-sm text-muted-foreground">Total XP</div>

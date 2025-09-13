@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Play, Pause, RotateCcw, Swords } from "lucide-react";
+import { Play, Pause, RotateCcw, Swords, Sparkles } from "lucide-react";
 
 // Helper functions
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -55,7 +55,7 @@ export function TimerPage({
       <Card className="m-4 shadow-xl border-muted/40 overflow-hidden card-elevated flex-1">
         <CardHeader className="space-y-1 bg-gradient-to-br from-background to-muted/20">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Focus Timer
             </CardTitle>
             <kbd className="text-xs text-muted-foreground hidden md:block bg-muted px-2 py-1 rounded">
@@ -72,12 +72,12 @@ export function TimerPage({
             <div className="flex flex-col items-center gap-6 w-full">
               <div className="text-sm text-muted-foreground">Choose your quest</div>
               
-              <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-sm">
                 {presets.map((m) => (
                   <motion.div key={m} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}>
                     <Button 
                       size="lg" 
-                      className="h-14 text-lg w-full bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200" 
+                      className="h-12 text-base w-full bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-md hover:shadow-lg transition-all duration-200" 
                       onClick={() => onStartWithPreset(m)}
                     >
                       <Swords className="h-5 w-5 mr-2" /> {m} min
@@ -89,7 +89,7 @@ export function TimerPage({
               <div className="flex flex-col gap-3 w-full max-w-sm">
                 <Input
                   type="number"
-                  className="text-center border-2 focus:border-black dark:focus:border-white focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="h-10 text-base text-center border-2 focus:border-black dark:focus:border-white focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-all duration-200 shadow-sm hover:shadow-md"
                   value={customMins}
                   min={1}
                   max={180}
@@ -97,10 +97,10 @@ export function TimerPage({
                   onChange={(e) => setCustomMins(clamp(parseInt(e.target.value || "0"), 1, 180))}
                 />
                 <Button 
-                  className="w-full bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200" 
+                  className="h-12 text-base w-full btn-gradient ring-2 ring-primary/60 ring-offset-2 ring-offset-background" 
                   onClick={() => onStartWithPreset(customMins)}
                 >
-                  Start Custom Session
+                  <Sparkles className="h-5 w-5 mr-2" /> Start Custom Session • {customMins} min
                 </Button>
               </div>
               
@@ -130,7 +130,7 @@ export function TimerPage({
 
               {/* Timer ring */}
               <div className="relative">
-                <svg viewBox="0 0 320 320" className="block w-[80vw] max-w-[280px] h-auto drop-shadow-lg">
+                <svg viewBox="0 0 320 320" className="block w-[min(78vw,300px)] h-[min(78vw,300px)] drop-shadow-lg">
                   <defs>
                     <linearGradient id={`${ringGradientId}-light`} x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="black" />
@@ -198,7 +198,7 @@ export function TimerPage({
                   <Button 
                     size="lg" 
                     onClick={onStartPause} 
-                    className="px-8 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="h-10 px-7 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     {running ? (
                       <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export function TimerPage({
                     variant="secondary" 
                     size="lg" 
                     onClick={onReset} 
-                    className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200"
+                    className="h-10 bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset
                   </Button>
@@ -228,7 +228,7 @@ export function TimerPage({
                     <Button 
                       variant="ghost" 
                       onClick={onEndEarly} 
-                      className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+                      className="h-10 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
                     >
                       Bank now
                     </Button>
