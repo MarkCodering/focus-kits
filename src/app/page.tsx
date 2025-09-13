@@ -187,8 +187,10 @@ export default function FocusKitsApp() {
     } catch {}
   }, []);
 
+  const minutesFromDuration = (secs: number) => Math.round(secs / 60);
+
   // notifications
-  const notify = (title: string, body?: string) => {
+  const notify = useCallback((title: string, body?: string) => {
     if (!settings.notifyOn || typeof window === "undefined") return;
     if ("Notification" in window) {
       if (Notification.permission === "granted") new Notification(title, { body });
@@ -196,14 +198,12 @@ export default function FocusKitsApp() {
         Notification.requestPermission().then((perm) => perm === "granted" && new Notification(title, { body }));
       }
     }
-  };
+  }, [settings.notifyOn]);
 
-  const beep = () => settings.soundOn && audioRef.current?.play().catch(() => {});
-
-  const minutesFromDuration = (secs: number) => Math.round(secs / 60);
+  const beep = useCallback(() => settings.soundOn && audioRef.current?.play().catch(() => {}), [settings.soundOn]);
 
   // XP & loot
-  const grantXP = (mins: number) => {
+  const grantXP = useCallback((mins: number) => {
     let gained = Math.max(1, Math.round(mins));
     if (mode === "focus") gained += 5;
     const today = fmtDate(new Date());
@@ -232,15 +232,15 @@ export default function FocusKitsApp() {
 
     if (leveledUp) setShowLevelUp(true);
     return gained;
-  };
+  }, [mode, meta, duration]);
 
-  const maybeLoot = () => {
+  const maybeLoot = useCallback(() => {
     if (Math.random() < 0.2) {
       const items = ["✨ Cosmic Sticker", "🧠 Focus Badge", "🔥 Momentum Flame", "🌿 Forest Totem", "🛰️ Orbital Token"];
       setLootItem(items[Math.floor(Math.random() * items.length)]);
       setShowLoot(true);
     }
-  };
+  }, []);
 
   const handleSessionComplete = useCallback((full: boolean) => {
     beep();
