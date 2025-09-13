@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
 
@@ -40,8 +41,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = cookies();
+  const savedTheme = cookieStore.get("fk-theme")?.value;
+  const htmlClass = savedTheme === "dark" ? "dark" : undefined;
   return (
-    <html lang="en">
+    <html lang="en" className={htmlClass} suppressHydrationWarning>
       <head>
         <Script id="theme-init" strategy="beforeInteractive">
           {`
@@ -53,6 +57,8 @@ export default function RootLayout({
               var dark = m === 'dark' || (m === 'system' && prefersDark);
               var root = document.documentElement;
               if (dark) root.classList.add('dark'); else root.classList.remove('dark');
+              // Persist effective theme for SSR alignment on next load
+              document.cookie = 'fk-theme=' + (dark ? 'dark' : 'light') + '; Max-Age=31536000; Path=/';
             }catch(e){}
           })();
           `}
@@ -69,7 +75,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>
