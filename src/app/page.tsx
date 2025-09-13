@@ -15,6 +15,7 @@ import { TimerPage } from "@/components/pages/TimerPage";
 import { ProgressPage } from "@/components/pages/ProgressPage";
 import { SettingsPage } from "@/components/pages/SettingsPage";
 import { StatsPage } from "@/components/pages/StatsPage";
+import { AuthWrapper } from "@/components/AuthWrapper";
 import { Sun, Moon, Star, Gift, Crown } from "lucide-react";
 
 // --------------------------
@@ -100,6 +101,8 @@ export default function FocusKitsApp() {
       const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
       const shouldDark = themeMode === "dark" || (themeMode === "system" && prefersDark);
       root.classList.toggle("dark", shouldDark);
+      // keep SSR in sync on subsequent navigations
+      try { document.cookie = `fk-theme=${shouldDark ? 'dark' : 'light'}; Max-Age=31536000; Path=/`; } catch {}
     };
     apply();
     localStorage.setItem(LS.theme, themeMode);
@@ -376,85 +379,87 @@ export default function FocusKitsApp() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-background text-foreground">
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="mx-auto max-w-md px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold">Focus Kits</div>
-          <div className="flex gap-1.5 rounded-xl border p-1.5 bg-muted/30">
-            <Button 
-              size="sm" 
-              variant={themeMode === "light" ? "default" : "ghost"} 
-              onClick={() => setThemeMode("light")} 
-              title="Light" 
-              className={themeMode === "light" ? "bg-black text-white hover:bg-black/90" : ""}
-            >
-              <Sun className="h-4 w-4"/>
-            </Button>
-            <Button 
-              size="sm" 
-              variant={themeMode === "dark" ? "default" : "ghost"} 
-              onClick={() => setThemeMode("dark")} 
-              title="Dark" 
-              className={themeMode === "dark" ? "bg-white text-black hover:bg-white/90" : ""}
-            >
-              <Moon className="h-4 w-4"/>
-            </Button>
+    <AuthWrapper>
+      <div className="relative min-h-screen w-full bg-background text-foreground">
+        {/* Top bar */}
+        <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+          <div className="mx-auto max-w-md px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2 font-semibold">Focus Kits</div>
+            <div className="flex gap-1.5 rounded-xl border p-1.5 bg-muted/30">
+              <Button 
+                size="sm" 
+                variant={themeMode === "light" ? "default" : "ghost"} 
+                onClick={() => setThemeMode("light")} 
+                title="Light" 
+                className={themeMode === "light" ? "bg-black text-white hover:bg-black/90" : ""}
+              >
+                <Sun className="h-4 w-4"/>
+              </Button>
+              <Button 
+                size="sm" 
+                variant={themeMode === "dark" ? "default" : "ghost"} 
+                onClick={() => setThemeMode("dark")} 
+                title="Dark" 
+                className={themeMode === "dark" ? "bg-white text-black hover:bg-white/90" : ""}
+              >
+                <Moon className="h-4 w-4"/>
+              </Button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="relative">
-        {renderCurrentPage()}
-      </main>
+        {/* Main Content */}
+        <main className="relative">
+          {renderCurrentPage()}
+        </main>
 
-      {/* Bottom Navigation */}
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+        {/* Bottom Navigation */}
+        <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
 
-      {/* Dialogs */}
-      <Dialog open={showLevelUp} onOpenChange={setShowLevelUp}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Crown className="h-5 w-5" /> Level Up!</DialogTitle>
-            <DialogDescription>New level unlocked. Keep the streak to snowball gains.</DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center gap-2"><Badge className="bg-black text-white dark:bg-white dark:text-black shadow-md">+Level</Badge><Badge variant="secondary" className="bg-gradient-to-r from-secondary to-secondary/90">+Perks (soon)</Badge></div>
-          <div className="flex justify-end"><Button onClick={()=>setShowLevelUp(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Nice</Button></div>
-        </DialogContent>
-      </Dialog>
+        {/* Dialogs */}
+        <Dialog open={showLevelUp} onOpenChange={setShowLevelUp}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Crown className="h-5 w-5" /> Level Up!</DialogTitle>
+              <DialogDescription>New level unlocked. Keep the streak to snowball gains.</DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center gap-2"><Badge className="bg-black text-white dark:bg-white dark:text-black shadow-md">+Level</Badge><Badge variant="secondary" className="bg-gradient-to-r from-secondary to-secondary/90">+Perks (soon)</Badge></div>
+            <div className="flex justify-end"><Button onClick={()=>setShowLevelUp(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Nice</Button></div>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={showLoot} onOpenChange={setShowLoot}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Gift className="h-5 w-5" /> Loot Box!</DialogTitle>
-            <DialogDescription>Surprise reward unlocked.</DialogDescription>
-          </DialogHeader>
-          <div className="text-lg">{lootItem}</div>
-          <div className="flex justify-end"><Button onClick={()=>setShowLoot(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Claim</Button></div>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={showLoot} onOpenChange={setShowLoot}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Gift className="h-5 w-5" /> Loot Box!</DialogTitle>
+              <DialogDescription>Surprise reward unlocked.</DialogDescription>
+            </DialogHeader>
+            <div className="text-lg">{lootItem}</div>
+            <div className="flex justify-end"><Button onClick={()=>setShowLoot(false)} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Claim</Button></div>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={showFailSafe} onOpenChange={setShowFailSafe}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Star className="h-5 w-5" /> Partial XP banked</DialogTitle>
-            <DialogDescription>You collected {earnedPartial} XP. Want a 5‑minute bonus round?</DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-between">
-            <Button variant="secondary" onClick={()=>setShowFailSafe(false)} className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200">Not now</Button>
-            <Button onClick={()=>{ setShowFailSafe(false); startWithPreset(5); }} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Bonus Round</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={showFailSafe} onOpenChange={setShowFailSafe}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Star className="h-5 w-5" /> Partial XP banked</DialogTitle>
+              <DialogDescription>You collected {earnedPartial} XP. Want a 5‑minute bonus round?</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-between">
+              <Button variant="secondary" onClick={()=>setShowFailSafe(false)} className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary shadow-md hover:shadow-lg transition-all duration-200">Not now</Button>
+              <Button onClick={()=>{ setShowFailSafe(false); startWithPreset(5); }} className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200">Bonus Round</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-      {/* audio */}
-      <audio ref={audioRef} preload="auto">
-        <source
-          src="data:audio/wav;base64,UklGRoQHAABXQVZFZm10IBAAAAABAAEAwF0AAIC7AAACABYAaW1wb3J0YW50AAAASAAAAGQAAABkYXRhAAAAAIAAAACAgICAgICAgP8AAP8A/wAAAP///wD///8A////AP///wD///8A////AP7+/gD9/f0A/Pz8APv7+wD39/cA9PT0AOPA4ADf398A29vbANjY2ADU1NQA0tLSANHR0QDQ0NAAzMzMANfX1wDR0dEA09PTANHR0QDg4OAA5OTkAOTk5ADm5uYA6enpAOrq6gDs7OwA8PDwAPX19QD5+fkA+vr6AP7+/g=="
-          type="audio/wav"
-        />
-      </audio>
-    </div>
+        {/* audio */}
+        <audio ref={audioRef} preload="auto">
+          <source
+            src="data:audio/wav;base64,UklGRoQHAABXQVZFZm10IBAAAAABAAEAwF0AAIC7AAACABYAaW1wb3J0YW50AAAASAAAAGQAAABkYXRhAAAAAIAAAACAgICAgICAgP8AAP8A/wAAAP///wD///8A////AP///wD///8A////AP7+/gD9/f0A/Pz8APv7+wD39/cA9PT0AOPA4ADf398A29vbANjY2ADU1NQA0tLSANHR0QDQ0NAAzMzMANfX1wDR0dEA09PTANHR0QDg4OAA5OTkAOTk5ADm5uYA6enpAOrq6gDs7OwA8PDwAPX19QD5+fkA+vr6AP7+/g=="
+            type="audio/wav"
+          />
+        </audio>
+      </div>
+    </AuthWrapper>
   );
 }
