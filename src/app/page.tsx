@@ -250,7 +250,7 @@ export default function FocusKitsApp() {
     const gained = grantXP(minsDone);
     if (!full) { setEarnedPartial(gained); setShowFailSafe(true); }
     maybeLoot();
-  }, [duration, remaining, mode, settings, meta, beep, notify, grantXP, maybeLoot]);
+  }, [duration, remaining, beep, notify, grantXP, maybeLoot]);
 
   // Timer engine
   useEffect(() => {
@@ -278,14 +278,6 @@ export default function FocusKitsApp() {
     return () => { if (tickRef.current) cancelAnimationFrame(tickRef.current); };
   }, [running, handleSessionComplete]);
 
-  const switchMode = (m: Mode, mmins?: number) => {
-    setMode(m);
-    const mins = m === "focus" ? (mmins ?? minutesFromDuration(duration)) : m === "short" ? 5 : m === "long" ? 15 : customMins;
-    const secs = Math.max(1, Math.round(mins * 60));
-    setDuration(secs);
-    setRemaining(secs);
-  };
-
   const startWithPreset = useCallback((mins: number) => {
     setQuestChosen(true);
     setMode("focus");
@@ -295,6 +287,14 @@ export default function FocusKitsApp() {
   }, []);
 
   const onStartPause = () => setRunning((v) => !v);
+  const switchMode = useCallback((m: Mode, mmins?: number) => {
+    setMode(m);
+    const mins = m === "focus" ? (mmins ?? minutesFromDuration(duration)) : m === "short" ? 5 : m === "long" ? 15 : customMins;
+    const secs = Math.max(1, Math.round(mins * 60));
+    setDuration(secs);
+    setRemaining(secs);
+  }, [duration, customMins]);
+
   const onReset = useCallback(() => {
     switchMode(mode, minutesFromDuration(duration));
     setQuestChosen(false);
